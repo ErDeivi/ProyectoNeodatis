@@ -5,6 +5,7 @@ module com.example.proyectoneodatis {
     requires javafx.base;
 	requires com.google.gson;
 	requires javafx.graphics;
+    requires java.desktop;
 
 
     opens com.example.proyectoneodatis.controladores to javafx.fxml;

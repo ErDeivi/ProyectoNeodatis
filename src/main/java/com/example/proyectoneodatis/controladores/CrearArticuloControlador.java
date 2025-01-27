@@ -5,12 +5,11 @@ import com.example.proyectoneodatis.App;
 import com.example.proyectoneodatis.Modelo.Articulo;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
-import org.neodatis.odb.ODB;
-import org.neodatis.odb.ODBFactory;
 
+import javax.swing.*;
 import java.util.List;
 
 public class CrearArticuloControlador {
@@ -50,17 +49,53 @@ public class CrearArticuloControlador {
     @FXML
     void crearArticuloOnAction(ActionEvent event) {
         try {
-            // Obtener valores de los campos
-            int codigoValue = Integer.parseInt(codigo.getText());
-            String denominacionValue = denominacion.getText();
-            String categoriaValue = categoria.getText();
-            double pvpValue = Double.parseDouble(pvp.getText());
-            int uvValue = Integer.parseInt(uv.getText());
-            int stockValue = Integer.parseInt(stock.getText());
+            // Validar que el campo de código es un número entero
+            int codigoValue;
+            try {
+                codigoValue = Integer.parseInt(codigo.getText());
+            } catch (NumberFormatException e) {
+                showAlert("Error", "El campo 'Código' debe ser un número entero.");
+                return;
+            }
 
-            // Validar que los campos no estén vacíos
-            if (denominacionValue.isEmpty() || categoriaValue.isEmpty()) {
-                System.out.println("Por favor completa todos los campos.");
+            // Validar que denominación no esté vacío
+            String denominacionValue = denominacion.getText();
+            if (denominacionValue.isEmpty()) {
+                showAlert("Error", "El campo 'Denominación' no puede estar vacío.");
+                return;
+            }
+
+            // Validar que categoría no esté vacío
+            String categoriaValue = categoria.getText();
+            if (categoriaValue.isEmpty()) {
+                showAlert("Error", "El campo 'Categoría' no puede estar vacío.");
+                return;
+            }
+
+            // Validar que el campo PVP es un número decimal
+            double pvpValue;
+            try {
+                pvpValue = Double.parseDouble(pvp.getText());
+            } catch (NumberFormatException e) {
+                showAlert("Error", "El campo 'PVP' debe ser un número decimal.");
+                return;
+            }
+
+            // Validar que el campo UV es un número entero
+            int uvValue;
+            try {
+                uvValue = Integer.parseInt(uv.getText());
+            } catch (NumberFormatException e) {
+                showAlert("Error", "El campo 'Unidades Vendidas' debe ser un número entero.");
+                return;
+            }
+
+            // Validar que el campo Stock es un número entero
+            int stockValue;
+            try {
+                stockValue = Integer.parseInt(stock.getText());
+            } catch (NumberFormatException e) {
+                showAlert("Error", "El campo 'Stock' debe ser un número entero.");
                 return;
             }
 
@@ -78,14 +113,25 @@ public class CrearArticuloControlador {
             uv.clear();
             stock.clear();
 
-            System.out.println("Artículo creado con éxito: " + nuevoArticulo);
+            JOptionPane.showMessageDialog(null, "Artículo creado con éxito: " + nuevoArticulo, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            App.articulos = listaArticulos;
 
         } catch (Exception e) {
-            System.out.println("Error al crear el artículo: " + e.getMessage());
+            showAlert("Error", "Error al crear el artículo: " + e.getMessage());
         }
     }
+
+    // Método para mostrar alertas
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
     @FXML
     void salirOnAction(ActionEvent event){
-
+        App.setRoot("listados");
     }
 }
