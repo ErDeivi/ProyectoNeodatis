@@ -65,7 +65,6 @@ public class CrearArticuloControlador {
                 return;
             }
 
-            // Validar que categoría no esté vacío
             String categoriaValue = categoria.getText();
             if (categoriaValue.isEmpty()) {
                 showAlert("Error", "El campo 'Categoría' no puede estar vacío.");
