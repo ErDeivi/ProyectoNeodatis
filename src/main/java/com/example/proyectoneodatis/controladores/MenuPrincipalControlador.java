@@ -99,11 +99,7 @@ public class MenuPrincipalControlador {
 
     @FXML
     public void cerrarSesionOnAction(ActionEvent actionEvent) {
-        try {
-            App.setRoot("inicio");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        App.setRoot("inicio");
     }
 
     public void cambiarContrasenaOnAction(ActionEvent actionEvent) throws IOException {

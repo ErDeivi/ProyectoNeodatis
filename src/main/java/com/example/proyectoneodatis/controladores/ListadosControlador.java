@@ -6,6 +6,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -41,7 +43,7 @@ public class ListadosControlador{
     @FXML
     private TableColumn<Articulo, Integer> colStock;
 
-    private ObservableList<Articulo> listaArticulos;
+    public ObservableList<Articulo> listaArticulos;
 
     @FXML
     public void initialize() {
@@ -66,18 +68,42 @@ public class ListadosControlador{
         }
         odb.close();
         tablaArticulos.setItems(listaArticulos);
+        System.out.println(listaArticulos.toString());
     }
 
     public void atras(ActionEvent actionEvent) throws IOException {
         App.setRoot("menuPrincipal");
     }
 
+    public ObservableList<Articulo> getListaArticulos() {
+        return listaArticulos;
+    }
+
+    public void actualizarTabla() {
+        tablaArticulos.refresh();
+    }
+
     public void buscarOnAction(ActionEvent actionEvent) {
 
     }
 
-    public void nuevoArticuloOnAction(ActionEvent actionEvent) throws IOException {
-        App.setRoot("crearArticulo");
+    public void nuevoArticuloOnAction(ActionEvent actionEvent) {
+        try {
+            // Cargar el FXML para la vista de crear artículo
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("crearArticulo.fxml")); // Asegúrate de incluir .fxml
+            Parent root = loader.load();
+
+            // Obtener el controlador de la nueva vista
+            CrearArticuloControlador crearArticuloControlador = loader.getController();
+
+            // Pasar la lista de artículos al controlador de crear artículo
+            crearArticuloControlador.setListaArticulos(App.articulos); // Pasar la lista de artículos
+
+            // Cambiar la vista
+            App.setRoot("crearArticulo"); // Cambiar a la vista de crear artículo
+        } catch (IOException e) {
+            e.printStackTrace(); // Manejo de errores
+        }
     }
 
     public void borrarArticuloOnAction(ActionEvent actionEvent) {

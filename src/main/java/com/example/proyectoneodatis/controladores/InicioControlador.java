@@ -56,12 +56,8 @@ public void iniciarSesion(ActionEvent event){
 
     }else{
 
-        try {
             App.setRoot("menuPrincipal");
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-    }
 }
 }
 }
