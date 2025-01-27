@@ -9,12 +9,22 @@ import javafx.scene.control.TextField;
 import org.neodatis.odb.ODB;
 import org.neodatis.odb.ODBFactory;
 
+import static com.example.proyectoneodatis.controladores.ListadosControlador.articuloSeleccionado;
+
 public class CamposArticulosControlador {
-    public TextField codigo,denominacion,categoria,uv,stock;
+    public TextField codigo,denominacion,categoria,uv,pvp,stock;
     public Button editar,salir;
-    private Articulo articuloSeleccionado;
 
     public void initialize(){
+        // Configurar los campos del formulario con los datos del artículo seleccionado
+        if (articuloSeleccionado != null) {
+            codigo.setText(String.valueOf(articuloSeleccionado.getCodigo()));
+            denominacion.setText(String.valueOf(articuloSeleccionado.getDenominacion()));
+            categoria.setText(String.valueOf(articuloSeleccionado.getCategoria()));
+            uv.setText(String.valueOf(articuloSeleccionado.getUnidadesVendidas()));
+            pvp.setText(String.valueOf(articuloSeleccionado.getPrecioDeVentaAlPublico()));
+            stock.setText(String.valueOf(articuloSeleccionado.getStock()));
+        }
     }
 
 
@@ -49,17 +59,6 @@ public class CamposArticulosControlador {
         App.setRoot("listados");
     }
 
-    public void setArticuloSeleccionado(Articulo articuloSeleccionado) {
-        this.articuloSeleccionado = articuloSeleccionado;
 
-        // Configurar los campos del formulario con los datos del artículo seleccionado
-        if (articuloSeleccionado != null) {
-            codigo.setText(String.valueOf(articuloSeleccionado.getCodigo()));
-            denominacion.setText(String.valueOf(articuloSeleccionado.getDenominacion()));
-            categoria.setText(String.valueOf(articuloSeleccionado.getCategoria()));
-            uv.setText(String.valueOf(articuloSeleccionado.getUnidadesVendidas()));
-            stock.setText(String.valueOf(articuloSeleccionado.getStock()));
-        }
-    }
 
 }
