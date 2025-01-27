@@ -151,9 +151,41 @@ public class ListadosControlador{
     }
 
     public void modificarOnAction(ActionEvent actionEvent) {
+        // Obtener el artículo seleccionado
+        Articulo articuloSeleccionado = tablaArticulos.getSelectionModel().getSelectedItem();
 
+        if (articuloSeleccionado != null) {
+            try {
+                // Cargar el FXML para la vista de edición de artículos
+                FXMLLoader loader = new FXMLLoader(App.class.getResource("camposArticulos.fxml"));
+                Parent root = loader.load();
 
+                // Obtener el controlador de la nueva vista
+                CamposArticulosControlador camposArticulosControlador = loader.getController();
+
+                // Pasar el artículo seleccionado al controlador
+                camposArticulosControlador.setArticuloSeleccionado(articuloSeleccionado);
+
+                // Cambiar la vista
+                App.setRoot("camposArticulos");
+            } catch (IOException e) {
+                e.printStackTrace();
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Error al cargar la vista");
+                alert.setContentText("No se pudo cargar la vista para modificar el artículo.");
+                alert.showAndWait();
+            }
+        } else {
+            // Mostrar alerta si no se seleccionó ningún artículo
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Advertencia");
+            alert.setHeaderText("Ningún artículo seleccionado");
+            alert.setContentText("Por favor, selecciona un artículo para modificar.");
+            alert.showAndWait();
+        }
     }
+
 
     public void exportarOnAction(ActionEvent actionEvent) {
 

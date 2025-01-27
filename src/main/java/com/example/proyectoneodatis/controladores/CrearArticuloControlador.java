@@ -14,28 +14,11 @@ import java.util.List;
 
 public class CrearArticuloControlador {
     @FXML
-    private TextField codigo;
+    private TextField codigo,denominacion,categoria,pvp,uv,stock;
 
     @FXML
-    private TextField denominacion;
+    private Button crearArticulo,salir;
 
-    @FXML
-    private TextField categoria;
-
-    @FXML
-    private TextField pvp;
-
-    @FXML
-    private TextField uv;
-
-    @FXML
-    private TextField stock;
-
-    @FXML
-    private Button crearArticulo;
-
-    @FXML
-    private Button salir;
     private List<Articulo> listaArticulos; // Lista de artículos a la que se añadirá el nuevo artículo
 
     public void setListaArticulos(List<Articulo> listaArticulos) {
