@@ -1,10 +1,7 @@
 package com.example.proyectoneodatis.controladores;
 
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -37,7 +34,6 @@ public class MenuPrincipalControlador {
     public void gestionarArticulosOnAction(ActionEvent actionEvent) throws IOException {
         App.setRoot("listados");
     }
-
     @FXML
     public void exportarArticulosOnAction(ActionEvent actionEvent) {
         if (articulos.isEmpty()) {
@@ -67,8 +63,10 @@ public class MenuPrincipalControlador {
 
                 // Escribir los datos de los artículos
                 for (Articulo articulo : articulos) {
+
+                    // Generar la línea en formato CSV
                     String lineaCsv = String.format(
-                            "%d,\"%s\",%.2f,\"%s\",%d,%d",
+                            "%d,\"%s\",%s,\"%s\",%s,%s",
                             articulo.getCodigo(),
                             articulo.getDenominacion(),
                             articulo.getPrecioDeVentaAlPublico(),
@@ -97,16 +95,75 @@ public class MenuPrincipalControlador {
         }
     }
 
+
     @FXML
     public void cerrarSesionOnAction(ActionEvent actionEvent) {
         App.setRoot("inicio");
     }
-
+    @FXML
     public void cambiarContrasenaOnAction(ActionEvent actionEvent) throws IOException {
         App.setRoot("cambiarContrasena");
     }
 
+    @FXML
     public void importarArticulosOnAction(ActionEvent actionEvent) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        fileChooser.setTitle("Seleccionar Archivo CSV");
 
+        File archivoSeleccionado = fileChooser.showOpenDialog(null);
+
+        if (archivoSeleccionado != null) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(archivoSeleccionado))) {
+                List<Articulo> articulosImportados = new ArrayList<>();
+
+                // Leer y descartar la cabecera
+                String linea = reader.readLine();
+
+                // Leer cada línea restante del archivo
+                while ((linea = reader.readLine()) != null) {
+                    String[] campos = linea.split(","); // Dividir por comas
+
+                    // Validar que haya exactamente 6 campos
+                    if (campos.length == 6) {
+                        int codigo = Integer.parseInt(campos[0].trim());
+                        String denominacion = campos[1].trim();
+                        double pvp = Double.parseDouble(campos[2].trim());
+                        String categoria = campos[3].trim();
+                        int unidadesVendidas = Integer.parseInt(campos[4].trim());
+                        int stock = Integer.parseInt(campos[5].trim());
+
+                        // Crear y añadir el artículo
+                        Articulo articulo = new Articulo(codigo, denominacion, pvp, categoria, unidadesVendidas, stock);
+                        articulosImportados.add(articulo);
+                    }
+                }
+
+                // Guardar los artículos en la base de datos Neodatis y en la lista en memoria
+                ODB odb = ODBFactory.open("neodatis.test");
+                for (Articulo articulo : articulosImportados) {
+                    odb.store(articulo);
+                    articulos.add(articulo);
+                }
+                odb.close();
+
+                // Mostrar mensaje de éxito
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Éxito");
+                alert.setHeaderText("Importación Exitosa");
+                alert.setContentText("Se han importado " + articulosImportados.size() + " artículos correctamente.");
+                alert.showAndWait();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Error de Importación");
+                alert.setContentText("Hubo un error al importar los artículos: " + e.getMessage());
+                alert.showAndWait();
+            }
+        }
     }
+
+
 }
