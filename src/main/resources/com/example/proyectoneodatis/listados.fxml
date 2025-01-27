@@ -46,16 +46,11 @@
                   <Insets right="15.0" />
                </HBox.margin>
             </Button>
-            <ComboBox fx:id="comboBox" maxWidth="1.7976931348623157E308" prefHeight="26.0" prefWidth="183.0" promptText="Extension de Archivo" styleClass="opciones">
+            <ComboBox fx:id="comboBox" maxWidth="1.7976931348623157E308" prefHeight="26.0" prefWidth="183.0" onAction="#ejecutarConsultaOnAction" promptText="Consultas" styleClass="opciones">
                <HBox.margin>
                   <Insets right="15.0" />
                </HBox.margin>
             </ComboBox>
-            <Button fx:id="exportar" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#exportarOnAction" styleClass="opciones" text="Exportar">
-               <HBox.margin>
-                  <Insets right="15.0" />
-               </HBox.margin></Button>
-            <Button fx:id="filtros" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#filtrosOnAction" styleClass="opciones" text="Filtros" />
          </children>
       </HBox>
       <VBox prefHeight="200.0" prefWidth="100.0">
@@ -79,7 +74,7 @@
       </VBox>
       <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0" GridPane.columnSpan="5" GridPane.rowIndex="1" GridPane.rowSpan="3">
          <children>
-             <TableView fx:id="tablaArticulos" prefHeight="200.0" prefWidth="200.0">
+             <TableView fx:id="tablaArticulos" prefHeight="233.0" prefWidth="1037.0">
                  <columns>
                      <TableColumn fx:id="colCodigo" prefWidth="64.79998779296875" text="Código" />
                      <TableColumn fx:id="colDenominacion" prefWidth="114.39996337890625" text="Denominación" />
