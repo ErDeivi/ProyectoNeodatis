@@ -8,10 +8,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.neodatis.odb.ODB;
 import org.neodatis.odb.ODBFactory;
@@ -45,11 +42,21 @@ public class ListadosControlador{
     @FXML
     private TableColumn<Articulo, Integer> colStock;
 
+    @FXML
+    private ComboBox<String> comboBox;
+
     public ObservableList<Articulo> listaArticulos;
 
     @FXML
     public void initialize() {
             // Configurar las columnas
+        comboBox.getItems().addAll(
+                "Artículos con stock bajo (menos de 10 unidades)",
+                "Artículos por categoría",
+                "Artículos más vendidos",
+                "Artículos con precio superior a 100",
+                "Artículos con más de 20 unidades vendidas"
+        );
         colCodigo.setCellValueFactory(new PropertyValueFactory<>("codigo"));
         colDenominacion.setCellValueFactory(new PropertyValueFactory<>("denominacion"));
         colPrecio.setCellValueFactory(new PropertyValueFactory<>("precioDeVentaAlPublico"));
@@ -86,6 +93,120 @@ public class ListadosControlador{
 
     public void buscarOnAction(ActionEvent actionEvent) {
 
+    }
+
+    @FXML
+    private void ejecutarConsultaOnAction(ActionEvent event) {
+        String consultaSeleccionada = comboBox.getValue();
+
+        if (consultaSeleccionada == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Advertencia");
+            alert.setHeaderText("Consulta no seleccionada");
+            alert.setContentText("Por favor, selecciona una consulta del menú desplegable.");
+            alert.showAndWait();
+            return;
+        }
+
+        switch (consultaSeleccionada) {
+            case "Artículos con stock bajo (menos de 10 unidades)":
+                consultarStockBajo();
+                break;
+            case "Artículos por categoría":
+                consultarPorCategoria();
+                break;
+            case "Artículos más vendidos":
+                consultarMasVendidos();
+                break;
+            case "Artículos con precio superior a 100":
+                consultarPrecioAlto();
+                break;
+            case "Artículos con más de 20 unidades vendidas":
+                consultarUnidadesVendidas();
+                break;
+            default:
+                System.out.println("Consulta no reconocida.");
+        }
+    }
+
+    private void consultarStockBajo() {
+        ObservableList<Articulo> resultados = FXCollections.observableArrayList();
+        for (Articulo articulo : listaArticulos) {
+            if (articulo.getStock() < 10) {
+                resultados.add(articulo);
+            }
+        }
+        mostrarResultados(resultados);
+    }
+    private void mostrarResultados(ObservableList<Articulo> resultados) {
+        if (resultados.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Resultados");
+            alert.setHeaderText("Consulta sin resultados");
+            alert.setContentText("No se encontraron artículos que cumplan con los criterios.");
+            alert.showAndWait();
+        } else {
+            tablaArticulos.setItems(resultados);
+            tablaArticulos.refresh();
+        }
+    }
+    private String mostrarInputDialog(String mensaje) {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Consulta personalizada");
+        dialog.setHeaderText(null);
+        dialog.setContentText(mensaje);
+
+        var resultado = dialog.showAndWait();
+        return resultado.orElse(null);
+    }
+
+
+    private void consultarPorCategoria() {
+        ObservableList<Articulo> resultados = FXCollections.observableArrayList();
+        String categoria = mostrarInputDialog("Introduce la categoría a buscar:");
+        if (categoria != null) {
+            for (Articulo articulo : listaArticulos) {
+                if (articulo.getCategoria().equalsIgnoreCase(categoria)) {
+                    resultados.add(articulo);
+                }
+            }
+            mostrarResultados(resultados);
+        }
+    }
+
+    private void consultarMasVendidos() {
+        ObservableList<Articulo> resultados = FXCollections.observableArrayList();
+        int maxUnidadesVendidas = listaArticulos.stream()
+                .mapToInt(Articulo::getUnidadesVendidas)
+                .max()
+                .orElse(0);
+
+        for (Articulo articulo : listaArticulos) {
+            if (articulo.getUnidadesVendidas() == maxUnidadesVendidas) {
+                resultados.add(articulo);
+            }
+        }
+        mostrarResultados(resultados);
+    }
+
+    private void consultarPrecioAlto() {
+        ObservableList<Articulo> resultados = FXCollections.observableArrayList();
+        for (Articulo articulo : listaArticulos) {
+            if (articulo.getPrecioDeVentaAlPublico() > 100) {
+                resultados.add(articulo);
+            }
+        }
+        mostrarResultados(resultados);
+    }
+
+    private void consultarUnidadesVendidas() {
+        ObservableList<Articulo> resultados = FXCollections.observableArrayList();
+        for (Articulo articulo : listaArticulos) {
+            if (articulo.getUnidadesVendidas() > 20) {
+                resultados.add(articulo);
+            }
+        }
+        mostrarResultados(resultados);
     }
 
     public void nuevoArticuloOnAction(ActionEvent actionEvent) {
@@ -137,7 +258,7 @@ public class ListadosControlador{
                 odb.close();
 
                 // Refrescar la tabla
-                tablaArticulos.refresh();
+                actualizarTabla();
                 System.out.println("Artículo eliminado con éxito: " + articuloSeleccionado);
             }
         } else {
