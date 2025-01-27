@@ -58,10 +58,12 @@ public class ListadosControlador{
         colStock.setCellValueFactory(new PropertyValueFactory<>("stock"));
         // Agregar los artículos
         listaArticulos = FXCollections.observableArrayList();
-        ODB odb = ODBFactory.open("neonatis.test");
-        for (Articulo articulo : articulos) {
-            odb.store(articulo);
-            System.out.println(articulo);
+        ODB odb = ODBFactory.open("neodatis.test");
+        if (odb.getObjects(Articulo.class).isEmpty()) {
+        	for (Articulo articulo : articulos) {
+        		odb.store(articulo);
+        		System.out.println(articulo);
+        	}
         }
         var objetos = odb.getObjects(Articulo.class);
         while (objetos.hasNext()) {
