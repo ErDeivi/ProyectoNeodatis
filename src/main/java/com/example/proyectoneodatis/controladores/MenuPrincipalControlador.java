@@ -63,10 +63,9 @@ public class MenuPrincipalControlador {
 
                 // Escribir los datos de los artículos
                 for (Articulo articulo : articulos) {
-
                     // Generar la línea en formato CSV
                     String lineaCsv = String.format(
-                            "%d,\"%s\",%s,\"%s\",%s,%s",
+                            "%d,%s,%s,%s,%d,%d",
                             articulo.getCodigo(),
                             articulo.getDenominacion(),
                             articulo.getPrecioDeVentaAlPublico(),
@@ -94,6 +93,7 @@ public class MenuPrincipalControlador {
             }
         }
     }
+
 
 
     @FXML
@@ -139,12 +139,21 @@ public class MenuPrincipalControlador {
                     }
                 }
 
-                // Guardar los artículos en la base de datos Neodatis y en la lista en memoria
-                ODB odb = ODBFactory.open("neodatis.test");
-                for (Articulo articulo : articulosImportados) {
-                    odb.store(articulo);
-                    articulos.add(articulo);
+                // Eliminar el archivo de base de datos anterior (neodatis.test)
+                File archivoBD = new File("neodatis.test");
+                if (archivoBD.exists()) {
+                    archivoBD.delete();  // Elimina el archivo de base de datos existente
                 }
+
+                // Crear una nueva base de datos
+                ODB odb = ODBFactory.open("neodatis.test");
+
+                // Almacenar los nuevos artículos
+                for (Articulo articulo : articulosImportados) {
+                    odb.store(articulo);  // Guarda el artículo en la base de datos
+                    articulos.add(articulo);  // Añade el artículo a la lista en memoria
+                }
+
                 odb.close();
 
                 // Mostrar mensaje de éxito

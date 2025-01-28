@@ -50,49 +50,75 @@ public class ListadosControlador{
 
     @FXML
     public void initialize() {
-            // Configurar las columnas
+        if (listaArticulos == null) {
+            listaArticulos = FXCollections.observableArrayList();
+        }
+        // Configurar ComboBox
         comboBox.getItems().addAll(
                 "Artículos con stock bajo (menos de 10 unidades)",
                 "Artículos por categoría",
                 "Artículos más vendidos",
                 "Artículos con precio superior a 100",
-                "Artículos con más de 20 unidades vendidas"
+                "Artículos con más de 20 unidades vendidas",
+                "Tabla Completa"
         );
+
+        // Configurar las columnas de la tabla
         colCodigo.setCellValueFactory(new PropertyValueFactory<>("codigo"));
         colDenominacion.setCellValueFactory(new PropertyValueFactory<>("denominacion"));
         colPrecio.setCellValueFactory(new PropertyValueFactory<>("precioDeVentaAlPublico"));
         colCategoria.setCellValueFactory(new PropertyValueFactory<>("categoria"));
         colUnidadesVendidas.setCellValueFactory(new PropertyValueFactory<>("unidadesVendidas"));
         colStock.setCellValueFactory(new PropertyValueFactory<>("stock"));
-        // Agregar los artículos
+
+        // Crear lista observable
         listaArticulos = FXCollections.observableArrayList();
-        ODB odb = ODBFactory.open("neodatis.test");
-        if (odb.getObjects(Articulo.class).isEmpty()) {
-        	for (Articulo articulo : articulos) {
-        		odb.store(articulo);
-        		System.out.println(articulo);
-        	}
-        }
-        var objetos = odb.getObjects(Articulo.class);
-        while (objetos.hasNext()) {
-            listaArticulos.add((Articulo) objetos.next());
-        }
-        odb.close();
-        tablaArticulos.setItems(listaArticulos);
-        System.out.println(listaArticulos.toString());
+
+        // Cargar los artículos desde la base de datos
+        cargarArticulosDesdeDB();
     }
 
     public void atras(ActionEvent actionEvent) throws IOException {
         App.setRoot("menuPrincipal");
     }
+    private void cargarArticulosDesdeDB() {
+        listaArticulos.clear(); // Limpiar la lista antes de cargar nuevos datos
+        ODB odb = ODBFactory.open("neodatis.test");
+
+        // Si la base de datos está vacía, guarda los artículos de App
+        if (odb.getObjects(Articulo.class).isEmpty()) {
+            for (Articulo articulo : App.articulos) {
+                odb.store(articulo);
+            }
+        }
+
+        var objetos = odb.getObjects(Articulo.class);
+        while (objetos.hasNext()) {
+            listaArticulos.add((Articulo) objetos.next());
+        }
+
+        odb.close();
+
+        // Actualizar la tabla con los datos obtenidos
+        tablaArticulos.setItems(listaArticulos);
+        tablaArticulos.refresh(); // Refrescar la tabla para ver los cambios
+    }
+
 
     public ObservableList<Articulo> getListaArticulos() {
         return listaArticulos;
     }
 
     public void actualizarTabla() {
-        tablaArticulos.refresh();
+        if (listaArticulos == null) {
+            listaArticulos = FXCollections.observableArrayList(); // Inicializar si es nulo
+        }
+        listaArticulos.setAll(App.articulos); // Actualizar con la lista más reciente
+        if (tablaArticulos != null) {
+            tablaArticulos.refresh(); // Refrescar la tabla solo si está inicializada
+        }
     }
+
 
     public void buscarOnAction(ActionEvent actionEvent) {
 
@@ -126,6 +152,9 @@ public class ListadosControlador{
                 break;
             case "Artículos con más de 20 unidades vendidas":
                 consultarUnidadesVendidas();
+                break;
+            case "Tabla Completa":
+                mostrarResultados(getListaArticulos());
                 break;
             default:
                 System.out.println("Consulta no reconocida.");
@@ -248,20 +277,33 @@ public class ListadosControlador{
                 // Eliminar el artículo de la lista
                 listaArticulos.remove(articuloSeleccionado);
 
-                // Actualizar la base de datos
-                ODB odb = ODBFactory.open("neonatis.test");
+                ODB odb = ODBFactory.open("neodatis.test");
                 var objetos = odb.getObjects(Articulo.class);
+
+                boolean articuloEncontrado = false;
+
                 while (objetos.hasNext()) {
                     Articulo articulo = (Articulo) objetos.next();
+
+                    // Imprimir para depuración
+                    System.out.println("Comparando: " + articulo.getCodigo() + " con " + articuloSeleccionado.getCodigo());
+
                     if (articulo.getCodigo().equals(articuloSeleccionado.getCodigo())) {
-                        odb.delete(articulo);
+                        odb.delete(articulo); // Borrar el objeto exacto recuperado de la base de datos
+                        articuloEncontrado = true;
+                        System.out.println("Artículo eliminado de la base de datos: " + articulo);
                         break;
                     }
                 }
+
+                if (!articuloEncontrado) {
+                    System.out.println("El artículo no fue encontrado en la base de datos.");
+                }
+
                 odb.close();
 
                 // Refrescar la tabla
-                actualizarTabla();
+                tablaArticulos.refresh();
                 System.out.println("Artículo eliminado con éxito: " + articuloSeleccionado);
             }
         } else {
@@ -273,7 +315,6 @@ public class ListadosControlador{
             alert.showAndWait();
         }
     }
-
     public void modificarOnAction(ActionEvent actionEvent) {
         // Obtener el artículo seleccionado
         articuloSeleccionado = tablaArticulos.getSelectionModel().getSelectedItem();

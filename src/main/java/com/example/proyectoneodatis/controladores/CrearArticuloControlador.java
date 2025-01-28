@@ -8,8 +8,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import org.neodatis.odb.ODB;
+import org.neodatis.odb.ODBFactory;
 
 import javax.swing.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CrearArticuloControlador {
@@ -41,6 +44,23 @@ public class CrearArticuloControlador {
                 return;
             }
 
+            // Verificar si el código ya existe y asignar el siguiente libre si es necesario
+            ODB odb = ODBFactory.open("neodatis.test");
+            var objetos = odb.getObjects(Articulo.class);
+            List<Integer> codigosExistentes = new ArrayList<>();
+
+            while (objetos.hasNext()) {
+                Articulo articulo = (Articulo) objetos.next();
+                codigosExistentes.add(articulo.getCodigo());
+            }
+
+            if (codigosExistentes.contains(codigoValue)) {
+                // Encontrar el siguiente código libre
+                while (codigosExistentes.contains(codigoValue)) {
+                    codigoValue++;
+                }
+                JOptionPane.showMessageDialog(null, "El código ya existe. Se asignó el siguiente código libre: " + codigoValue, "Información", JOptionPane.INFORMATION_MESSAGE);
+            }
             // Validar que denominación no esté vacío
             String denominacionValue = denominacion.getText();
             if (denominacionValue.isEmpty()) {
@@ -83,7 +103,8 @@ public class CrearArticuloControlador {
 
             // Crear un nuevo artículo
             Articulo nuevoArticulo = new Articulo(codigoValue, denominacionValue, pvpValue, categoriaValue, uvValue, stockValue);
-
+            odb.store(nuevoArticulo);
+            odb.close();
             // Agregarlo a la lista de artículos
             listaArticulos.add(nuevoArticulo);
 
