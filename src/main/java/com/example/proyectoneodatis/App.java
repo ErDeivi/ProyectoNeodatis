@@ -19,7 +19,6 @@ public class App extends Application {
     public static List<Articulo> articulos = new ArrayList<>();
     private static Stage primaryStage; // Almacenar el escenario principal
     public static File contrasenaInicioFile = new File("contrasenaFile");
-
     @Override
     public void start(Stage stage) throws IOException {
         primaryStage = stage; // Inicializar el escenario principal
@@ -45,9 +44,8 @@ public class App extends Application {
                 System.err.println("Error al leer el archivo de contraseña: " + e.getMessage());
             }
         }
-
         // Cargar la primera escena
-        setRoot("listados"); // Cambiar a la vista de listados
+        setRoot("inicio"); // Cambiar a la vista de listados
         stage.setTitle("App");
         stage.show();
     }
